@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-//    User createUser(User user);
+
    // User updateUser(Long userId,User user);
     //void deleteUser(Long userId);
     //Optional<User> getUserId(Long userId);
 //    List<User> getAllUsers();
-    //Requests requestAccountDeletion(Long userId);
+    Requests requestAccountDeletion(Long userId);
     boolean loginUser(String email,String password);
 
-
+    public User getByEmail(String email);
     User createUser(User user, Long managerId); // Assign user to a manager
     User getUserById(Long id);
     List<User> getAllUsers();

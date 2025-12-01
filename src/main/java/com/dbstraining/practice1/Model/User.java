@@ -1,5 +1,7 @@
 package com.dbstraining.practice1.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,15 +28,12 @@ public class User {
 
     private String password;
 
-
-
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "manager_id")
     private Manager manager;
 
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Requests> requests;
 }
-
-

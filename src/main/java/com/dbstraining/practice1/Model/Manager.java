@@ -30,5 +30,7 @@ public class Manager {
     @OneToMany(mappedBy = "manager", cascade = CascadeType.ALL)
     private List<User> users;
 
-
+    @ManyToOne
+    @JoinColumn(name = "manager_id")
+    private Manager manager;
 }

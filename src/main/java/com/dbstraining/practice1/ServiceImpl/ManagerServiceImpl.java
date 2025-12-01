@@ -10,6 +10,7 @@ import com.dbstraining.practice1.Service.ManagerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,13 +33,42 @@ public class ManagerServiceImpl implements ManagerService {
                     .orElseThrow(() -> new RuntimeException("Manager not found")));
         }
 
-         @Override
+    @Override
+    public void approveRequest(Long requestId,Long managerId) {
+        Requests requests=requestRepository.findById(requestId)
+                .orElseThrow(()->new RuntimeException("Request not Found"));
+        requests.setStatus("APPROVED");
+        requests.setUpdatedAt(LocalDateTime.now());
+        requestRepository.save(requests);
+
+        User user=requests.getUser();
+        if(user!=null){
+            userRepository.delete(user);
+        }
+    }
+
+    @Override
+    public void rejectRequest(Long requestId,Long managerId) {
+        Requests requests=requestRepository.findById(requestId)
+                .orElseThrow(()->new RuntimeException("Request not Found"));
+        requests.setStatus("REJECTED");
+        requests.setUpdatedAt(LocalDateTime.now());
+        requestRepository.save(requests);
+    }
+
+    @Override
          public boolean loginAdmin(String email, String password) {
             Manager manager=managerRepository.findByEmail(email);
             return manager!=null && manager.getPassword().equals(password);
          }
 
-         @Override
+    @Override
+    public Manager getByEmail(String email) {
+        return managerRepository.findByEmail(email);
+    }
+
+
+    @Override
          public List<Manager> getAllManagers() {
             return managerRepository.findAll();
         }

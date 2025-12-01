@@ -9,4 +9,5 @@ public interface RequestService {
     Requests getRequestById(Long id);
     List<Requests> getAllRequests();
     List<Requests> getRequestsByUser(Long userId);
+    Requests createDeletionRequest(Long userId);
 }

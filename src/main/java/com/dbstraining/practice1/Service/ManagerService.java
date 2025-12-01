@@ -12,11 +12,11 @@ public interface ManagerService {
     Optional<Manager> getManagerById(Long managerId);
     //void deleteManager(Long ManagerId);
 
-//    void approveRequest(Long requestId);
-//    void rejectRequest(Long requestId);
+    void approveRequest(Long requestId,Long managerId);
+    void rejectRequest(Long requestId,Long managerId);
     boolean loginAdmin(String email,String password);
 
-
+    Manager getByEmail(String email);
 
 //        Manager createManager(Manager manager);
 //        Manager getManagerById(Long id);

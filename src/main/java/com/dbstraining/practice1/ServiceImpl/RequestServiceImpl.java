@@ -6,6 +6,7 @@ import com.dbstraining.practice1.Repository.RequestRepository;
 import com.dbstraining.practice1.Repository.UserRepository;
 import com.dbstraining.practice1.Service.RequestService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Request;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -42,5 +43,17 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public List<Requests> getRequestsByUser(Long userId) {
         return requestRepository.findByUserId(userId);
+    }
+
+    @Override
+    public Requests createDeletionRequest(Long userId) {
+        User user=userRepository.findById(userId)
+                .orElseThrow(()->new RuntimeException("User not Found"));
+        Requests request=new Requests();
+        request.setUser(user);
+        request.setRequestType("Delete Account Request");
+        request.setStatus("PENDING");
+        request.setCreatedAt(LocalDateTime.now());
+        return requestRepository.save(request);
     }
 }
