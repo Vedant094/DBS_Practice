@@ -31,38 +31,45 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
+
         String token = null;
         String username = null;
 
+        // Extract access token only (Bearer token)
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
+
             try {
-                username = jwtUtil.extractUsername(token);
+                // Avoid parsing refresh token here
+                if (jwtUtil.isTokenValid(token)
+                        && !"refresh".equals(jwtUtil.parseClaims(token).get("typ"))) {
+
+                    username = jwtUtil.extractUsername(token);
+                }
             } catch (Exception e) {
-                // Invalid token -- let chain continue; SecurityContext won't be set
-                logger.warn("Invalid JWT token: " + e.getMessage());
+                logger.warn("Invalid or unsupported JWT token: " + e.getMessage());
             }
         }
 
-        // If we have username and no auth yet, validate token and set context
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            try {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                boolean valid = jwtUtil.validateToken(token, userDetails.getUsername());
-                if (valid) {
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
-            } catch (Exception e) {
-                // user not found or validation error; do not set auth
-                logger.warn("JWT authentication failed: " + e.getMessage());
-            }
+        // Authenticate if username present and security context empty
+        if (username != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            // Access token is already validated; set authentication
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+            authToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
         filterChain.doFilter(request, response);

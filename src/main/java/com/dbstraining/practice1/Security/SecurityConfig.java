@@ -30,34 +30,21 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {}) // use global CorsConfig
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .cors(cors -> {})
+                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
 
-        // Public endpoints: login + registration endpoints for users/managers
-        http.authorizeHttpRequests(auth -> auth
-                //Public endpoints
-                .requestMatchers("/auth/login","/auth/check-email").permitAll()
-                .requestMatchers(HttpMethod.POST,"/managers/register").permitAll()
-                .requestMatchers(HttpMethod.POST,"/users/{managerId}").permitAll()
+                        .requestMatchers("/auth/login", "/auth/check-email", "/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/managers/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/{managerId}").permitAll()
 
-                //Protected endpoints
+                        .requestMatchers("/managers/**").hasAuthority("ROLE_MANAGER")
+                        .requestMatchers("/users/**").hasAnyAuthority("ROLE_USER", "ROLE_MANAGER")
 
-                .requestMatchers("/managers/**").hasAuthority("ROLE_MANAGER")
-                .requestMatchers("/users/**").hasAnyAuthority("ROLE_USER","ROLE_MANAGER")
-
-
-                .anyRequest().authenticated()
-        );
-
-        // Optional: add CSP header if you really need it (fine to remove)
-        http.headers(headers -> headers
-                .contentSecurityPolicy(policy ->
-                        policy.policyDirectives("default-src 'self'; connect-src 'self' http://localhost:4200"))
-        );
+                        .anyRequest().authenticated()
+                );
 
         http.authenticationProvider(authenticationProvider());
-
-        // Add JWT filter before UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

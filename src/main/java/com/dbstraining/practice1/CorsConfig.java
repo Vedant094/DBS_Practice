@@ -1,3 +1,5 @@
+
+
 package com.dbstraining.practice1;
 
 import org.springframework.context.annotation.Bean;
@@ -17,8 +19,10 @@ public class CorsConfig {
                         .allowedOrigins("http://localhost:4200")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
+                        .exposedHeaders("Set-Cookie", "Authorization")
                         .allowCredentials(true);
             }
         };
     }
 }
+
